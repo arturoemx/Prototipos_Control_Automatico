@@ -1,0 +1,5 @@
+Pulsos por revolución en el motor: 500 ppr
+Con un valor de 130 rpm entonces tiene una relación de reducción de 1:34
+(aproximadamente 34 vueltas del eje del motor por cada vuelta del eje de salida)
+el encoder genera 12 ppr, si esto se combina con el tamaño del reductor 1:34 entonces
+se tiene un total de 408 ppr
