@@ -1,0 +1,59 @@
+Operacion normal:
+
+ git clone       :   Bajar un repositorio.
+ git add <file>  :   Añadir un archivo. Este puede ser un archivo nuevo,
+                     o bien si modificamos un archivo lo hacemos para que
+                     quede "staged". En cualquier caso, al hacer esto el
+                     archivo queda en estado "staged".
+ git commit [-a] [-m "Comentario"]
+                 :   Añade al repositorio los archivos que esten "staged".
+                     Si no utilizamos la opcion -m se abre el editor para
+                     capturar el comentario. La opcion -a incorpora aquellos
+                     archivos que han sido modificados pero que no han sido
+                     explicitamente "stageados" usando "git add"
+
+ git push        :   Empuja tu modificaciones al servidor.
+
+ git pull        :   Actualiza el repositorio local en base a lo que hay en
+                     el servidor.
+
+------------------------------
+
+Crear un proyecto nuevo:
+
+    Crear directorio del proyecto:
+       mkdir MiProyecto
+       cd MiProyecto
+       git init
+
+    Añadir archivos:
+        touch README
+        git add README
+        git commit -m "Initial Import".
+
+
+------------------------------
+
+
+Subir el proyecto a un repositorio:
+    Primero creamos un repositorio "desnudo" (i.e. no contiene un directorio de trabajo)
+      (asumiendo que estamos dentro del directorio MiProyecto)
+            cd ..
+            git clone --bare MiProyecto MiProyecto.git
+    Copiamos el directorio creado al repositorio:
+        tar -zcvf MiProyecto.git.tgz MiProyecto.git
+        scp -P<puerto> MiProyecto.git.tgz ServerName:
+        ssh -p<puerto> ServerName
+
+        # gitRepo es un directorio en donde se van a colocar
+        # los repositorios de git
+        cd gitRepo;
+        tar -zxvf ../MiProyecto.git.tgz
+        exit
+
+    Como ultimo paso, clonamos el proyecto desde el servidor.
+        (asumimos que estamos en la carpeta en donde esta el repositori inicial)
+        rm -fr MiProyecto*
+        git clone ssh://ServerName:puerto/home/username/gitRepo/MiProyecto
+
+    voila!!
