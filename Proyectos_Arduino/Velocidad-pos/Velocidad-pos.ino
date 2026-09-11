@@ -1,96 +1,96 @@
-#define ENC_IN_RIGHT_A 2
-#define ENC_COUNT_REV 500
-// Other encoder output to Arduino to keep track of wheel direction
-// Tracks the direction of rotation.
-#define ENC_IN_RIGHT_B 4
+//Pines para detectar los pulsos y la dirección
+//de giro del motor
+#define en_ch_A 2
+#define en_ch_B 4
+//Cantidad medida de pulsos manualmente
+#define pulsos_medidos 500 
+// True -> horario; false -> antihorario
+boolean direccion_mt= true;
  
-// True = Forward; False = Reverse
-boolean Direction_right = true;
+//Cuenta los pulsos a través de las interrupciones
+//en el pin 2
+volatile long conteo_pulsos = 0;
  
-// Keep track of the number of right wheel pulses
-volatile long right_wheel_pulse_count = 0;
- 
-// One-second interval for measurements
+//Intevalo de tiempo para el muestro de los pulsos de 1s
 int interval = 1000;
   
-// Counters for milliseconds during interval
+//Contadores en milisegundos durante el intervalo
 long previousMillis = 0;
 long currentMillis = 0;
  
-// Variable for RPM measuerment
-float rpm_right = 0;
+//Medida de velocidad en rpm
+float rpm_val = 0;
  
-// Variable for angular velocity measurement
-float ang_velocity_right = 0;
-float ang_velocity_right_deg = 0;
- 
-const float rpm_to_radians = 0.10471975512;
-const float rad_to_deg = 57.29578;
+//Velocidad angular en grados y radianes
+float vel_ang_rad = 0;
+float vel_ang_deg = 0;
+//Constantes de conversión a grados y radianes 
+const float rpm_rad = 0.10471975512;
+const float rad_deg = 57.29578;
  
 void setup() {
  
-  // Open the serial port at 9600 bps
+  //Inicialización de la comunicación serie 
   Serial.begin(9600); 
  
-  // Set pin states of the encoder
-  pinMode(ENC_IN_RIGHT_A , INPUT_PULLUP);
-  pinMode(ENC_IN_RIGHT_B , INPUT);
+  //Configuración de los pines del encoder
+  pinMode(en_ch_A , INPUT_PULLUP);
+  pinMode(en_ch_B , INPUT);
  
-  // Every time the pin goes high, this is a pulse
-  attachInterrupt(digitalPinToInterrupt(ENC_IN_RIGHT_A), right_wheel_pulse, RISING);
+  //La interrupción detecta el flanco ascendente y llama al servicio de
+  //interrupcción para irlos contando
+  attachInterrupt(digitalPinToInterrupt(en_ch_A), contar_pulsos, RISING);
    
 }
  
 void loop() {
  
-  // Record the time
+  //Se comienza a contar el tiempo de muestreo
   currentMillis = millis();
  
-  // If one second has passed, print the number of pulses
+  //Se compara si ya pasó el segundo e imprime el número de pulsos 
   if (currentMillis - previousMillis > interval) {
- 
+    //Se actualiza el intervalo de tiempo anterior con el actual
     previousMillis = currentMillis;
  
-    // Calculate revolutions per minute
-    rpm_right = (float)(right_wheel_pulse_count * 60 / ENC_COUNT_REV);
-    ang_velocity_right = rpm_right * rpm_to_radians;   
-    ang_velocity_right_deg = ang_velocity_right * rad_to_deg;
+    //Calcula los RPM
+    rpm_val = (float)(conteo_pulsos * 60 / pulsos_medidos);
+    vel_ang_rad = rpm_val * rpm_rad;   
+    vel_ang_deg = vel_ang_rad * rad_deg;
      
-    Serial.print(" Pulses: ");
-    Serial.println(right_wheel_pulse_count);
-    Serial.print(" Speed: ");
-    Serial.print(rpm_right);
-    Serial.println(" RPM");
-    Serial.print(" Angular Velocity: ");
-    Serial.print(rpm_right);
-    Serial.print(" rad per second");
+    Serial.print("Pulsos: ");
+    Serial.println(conteo_pulsos);
+    Serial.print("Velocidad: ");
+    Serial.print(rpm_val);
+    Serial.println("RPM");
+    Serial.print("Velocidad angular en rads: ");
+    Serial.print(vel_ang_rad);
+    Serial.print(" rads/s");
     Serial.print("\t");
-    Serial.print(ang_velocity_right_deg);
-    Serial.println(" deg per second");
+    Serial.print("Velocidad angular en grados");
+    Serial.print(vel_ang_rad);
+    Serial.println("g/s");
     Serial.println();
  
-    right_wheel_pulse_count = 0;
+    conteo_pulsos = 0;
    
   }
 }
  
-// Increment the number of pulses by 1
-void right_wheel_pulse() {
+//Incrementa los pulsos en 1
+void contar_pulsos() {
    
-  // Read the value for the encoder for the right wheel
-  int val = digitalRead(ENC_IN_RIGHT_B);
+  //Lee el valor del canal B en el encoder
+  int val = digitalRead(en_ch_B);
  
   if(val == LOW) {
-    Direction_right = false; // Reverse
+    direccion_mt= false; // antihorario
+    conteo_pulsos--;
   }
   else {
-    Direction_right = true; // Forward
+    direccion_mt= true; // horario
+    conteo_pulsos++; 
   }
+ }
    
-  if (Direction_right) {
-    right_wheel_pulse_count++;
-  }
-  else {
-    right_wheel_pulse_count--;
-  }
-}
+ 
