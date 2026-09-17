@@ -2,6 +2,10 @@
 
 \usepackage{graphicx}
 
+\usepackage{listings}
+
+\usepackage{xcolor}
+
 \usepackage{float}
 
 \usepackage{natbib}
@@ -66,6 +70,35 @@
 \bibliographystyle{apalikesp} 
 
 \date{}
+% --- Configuración del estilo de colores para Arduino ---
+\definecolor{arduinoGreen}{rgb}{0,0.6,0}
+\definecolor{arduinoGray}{rgb}{0.5,0.5,0.5}
+\definecolor{arduinoOrange}{rgb}{0.8,0.3,0}
+\definecolor{arduinoBlue}{rgb}{0.1,0.2,0.8}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{arduinoStyle}{
+	extendedchars=true,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {Ñ}{{\~N}}1,
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{arduinoGreen},
+	keywordstyle=\color{arduinoOrange},
+	numberstyle=\tiny\color{arduinoGray},
+	stringstyle=\color{arduinoBlue},
+	basicstyle=\ttfamily\small,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	language=C++ % Arduino se basa en C/C++
+}
+
+\lstset{style=arduinoStyle}
 
 \begin{document}
 
@@ -93,7 +126,7 @@ Hay que tener en cuenta que el motor de la Imagen~\ref{fig:mot1} solo tiene un s
 \begin{figure}
 	\centering
 	\includegraphics[width=0.30\txw]{Imagenes/motor_1_sensor.jpg}
-	\caption{Figura 1: Motor con un sensor de efecto Hall.}
+	\caption{Motor con un sensor de efecto Hall.}
 	\label{fig:mot1}
 \end{figure}
 
@@ -121,7 +154,7 @@ Si se desea analizar el comportamiento del encoder que integra el motor con un o
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.40\txw]{Imagenes/Osciloscopio.jpg}
-	\caption{Imagen 2: Señal del encoder vista con el osciloscopio.}
+	\caption{Señal del encoder vista con el osciloscopio.}
 	\label{fig:Oscilo}
 \end{figure}
 
@@ -130,19 +163,111 @@ Las señales observadas en la Imagen~\ref{fig:Oscilo} corresponden al motor con 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.40\txw]{Imagenes/cuadratura.png}
-	\caption{Imagen 3: Señales de un sensor con cuadratura.}
+	\caption{Señales de un sensor con cuadratura.}
 	\label{fig:cuadratura}
 \end{figure}
+\textbf{Implementación con Arduino para el conteo de los pulsos}
 
+\begin{lstlisting}[caption={Conteo de pulsos}]
+	//Pines 2 y 3 de arduino con soporte para
+	//interrupciones, sirve para detectar los pulsos
+	#define en_CH_A 2
+	#define en_CH_B 3 
+	//Se cuentan los pulsos que hay en las vueltas
+	volatile long cont_pulsos= 0;
+	
+	void setup() {
+		
+		//Se inicia la comunicación en serie con 9600bps
+		Serial.begin(9600); 
+		
+		/*Se define como entrada el pin 2 para que detecte
+		el estado del encoder y se define como entrada el pin 3
+		para determinar si va en sentido horario o antihorario
+		el motor*/
+		pinMode(en_CH_A, INPUT_PULLUP);
+		pinMode(en_CH_B, INPUT_PULLUP);
+		
+		//Cada flanco ascendente se detecta como un pulso
+		attachInterrupt(digitalPinToInterrupt(en_CH_A), contar_pulsos, RISING);
+	}
+	
+	void loop() {
+		
+		Serial.print("Pulsos: ");
+		Serial.println(cont_pulsos);  
+	}
+	
+	//Incrementa o decrementa en 1 cada pulso detectado
+	void contar_pulsos() {
+		if (digitalRead(en_CH_B) == HIGH){
+			cont_pulsos++; //Sentido horario
+		} else {
+			cont_pulsos--; //Sentido antihorario
+		}
+	}
+\end{lstlisting}
+Con este programa implementado \cite{automaticaddison-2021} se pueden obtener los pulsos que da el encoder con ayuda del microcontrolador Arduino, además permite determinar en qué sentido gira el motor, dependiendo en qué sentido gire el contador de los pulsos irá incrementando o decrementando, como se puede observar en las siguientes capturas.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.50\txw]{Imagenes/pulsosNeg.png}
+	\includegraphics[width=0.50\txw]{Imagenes/pulsosPos.png}
+	\caption{Conteo de pulsos negativos (arriba) y positivos (abajo)}
+	\label{fig:caps}
+\end{figure}
+Cabe mencionar que el motor usado para esta implementación cuenta con dos sensores de efecto Hall, la imagen del motor se muestra a continuación.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.50\txw]{Imagenes/mot2enc.jpg}
+	\caption{Motor con encoder de dos sensores efecto Hall.}
+	\label{fig:mot2}
+\end{figure}
+Este motor al contar con dos sensores de efecto hall se puede determinar su sentido de giro para controlarlo con precisión, el tamaño del reductor es idéntico al del motor con un sensor, lo que sí cambia es la distribución de los cables para las conexiones:
+\begin{itemize}
+	\item Cables de alimentación al motor: rojo (para alimencación VCC) y blanco (para GND)
+	\item Cables de alimentación del encoder: negro (GND) y azul (VCC en un rango de 3.3V a 5V)
+	\item Canales del encoder : amarillo (canal A) y verde (canal B)
+\end{itemize}
+\section{Motor puente H L298N}
+Es un controlador para manejar motores DC de hasta 2 amperios, el IC (circuito integrado) usado, originalmente de ST Microelectronics integra dos puentes H completos permitiendo controlar dos motores DC o un motor de paso con 1 o 2 polos.
+
+El módulo permite controlar el sentido y velocidad de giro de motores mediante señales TTL que se pueden obtener de microcontroladores y tarjetas de desarrollo como Arduino, Raspberry Pi o Launchpads de Texas Instruments. El control del sentido de giro se realiza mediante dos pines para cada motor, la velocidad de giro se puede regular haciendo uso de modulación por ancho de pulso (PWM por sus siglas en inglés).
+
+Tiene integrado un regulador de voltaje LM7805 de 5V encargado de alimentar la parte lógica del L298N, el uso de este regulador se hace a través de un Jumper y se puede usar para alimentar la etapa de control.
+
+\textbf{Especificaciones}
+\begin{itemize}
+	\item Canales 2: (soporta 2 motores DC o un motor paso a paso )
+	\item Voltaje lógico 5$V$
+	\item Voltaje de potencia ($V_{mot}$): 5$V$ - 35$V$ DC
+	\item Consumo de corriente (lógico): 0 a 36$mA$
+	\item Capacidad de corriente: 2$A$ (picos de hasta 3$A$)
+	\item Potencia máxima: 25$W$
+\end{itemize}
+\textbf{Consideraciones}
+\begin{itemize}
+	\item Voltaje de alimentación, mínimo de 5$V$. Posee dos entradas, una de 5$V$ para controlar la parte lógica y otra para alimentar las salidas al motor, que pueden ser de 5$V$ o más.
+	\item Posee un regulador de voltaje de 5$V$ 78M05, para alimentar la etapa lógica del L298N, sin embargo, cuando la alimentación supera los 1$2V$, se recomienda, utilizar una fuente de 5$V$ externa como medio de alimentación. 
+	\item Admite entradas de señal PWM para el control de velocidad. 
+	\item Posee 8 diodos de protección contra corriente inversas. 
+\end{itemize}
+Si se desea conectar el motor para observar el comportamiento con un programa de arduino o en un osciloscopio entonces se deben seguir estos pasos:
+\begin{itemize}
+	\item La alimentación del motor es de mínimo 6V y máximo 12V; ese voltaje de alimentación se obtiene de una fuente externa y se conecta a las terminales +12V y GND del módulo puente H, para que funcione se debe añadir una pequeña corriente que no supere los 2A, al encender la fuente debe encenderse un LED rojo en el módulo, indicando que está recibiendo alimentación correctamente.
+	\item La terminal de 5V si se trabaja con motores entre el rango previamente mencionado funciona como salida, es decir, se puede alimentar el encoder (por ejemplo) con esa terminal, si se trabaja con motores que superen los 12V de alimentación entonces los 5V pasan a ser entrada para alimentar la parte lógica que activa los motores.
+	\item Al usar una fuente externa para alimentar al módulo es recomendable unir la tierra de la fuente con el Arduino para minimizar ruido eléctrico y evitar daños por voltaje o corriente en los dispositivos usados.
+	\item El cable de VCC del motor se conecta a la salida del puente H OUT1, el GND del motor va a la terminal OUT2.
+	\item El cable VCC del codificador se puede conectar al pin 5V del arduino o los 5V de salida en el puente H, el cable de tierra se puede conectar a un pin GND del arduino o en la tierra compartida entre el microcontrolador y módulo.
+	\item Los canales del codificador se conectan con el gancho de la sonda del osciloscopio y la tierra compartida en el caimán.
+\end{itemize}
 \end{linespacing}
-
 
 
 
 
 En la sección~\ref{sec:Motor} (que es esta)
 
-En este trabajo citamos los siguientes artículos: \cite{Kerr2010}, \cite{Schanda2007}.
+En este trabajo citamos los siguientes artículos: \cite{automaticaddison-2021}, \cite{Schanda2007}.
 
 También puedes escribir algo así como ``vease la sig referencia~\citep{Kerr2010}'', o también puedes usar citet: ``vease la sig referencia~\citet{Kerr2010}''.
 
