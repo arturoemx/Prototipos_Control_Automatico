@@ -136,7 +136,7 @@ En caso de calcular la velocidad y posición de un motor con dos sensores Hall (
 
 La conexión necesaria para hacer el conteo de los pulsos con el microcontrolador consiste en conectar el canal A del encoder en un pin del microcontrolador que admita interrupciones, luego se conecta el VCC y GND del encoder a los pines de alimentación en el microcontrolador o se puede alimentar con una fuente externa.
 
-Una vez que obtenida la cantidad de pulsos que hay en una vuelta se puede calcular la velocidad y posición del motor a través de las siguientes fórmulas:
+Una vez que obtenida la cantidad de pulsos que hay en una vuelta se puede calcular la velocidad y posición del motor a través de las siguientes fórmulas \cite{automaticaddison-2021}:
 
 \begin{equation}
 \begin{aligned}
@@ -229,11 +229,11 @@ Este motor al contar con dos sensores de efecto hall se puede determinar su sent
 	\item Canales del encoder : amarillo (canal A) y verde (canal B)
 \end{itemize}
 \section{Motor puente H L298N}
-Es un controlador para manejar motores DC de hasta 2 amperios, el IC (circuito integrado) usado, originalmente de ST Microelectronics integra dos puentes H completos permitiendo controlar dos motores DC o un motor de paso con 1 o 2 polos.
+Es un controlador para manejar motores DC de hasta 2 amperios, el IC (circuito integrado) usado, originalmente de ST Microelectronics integra dos puentes H completos permitiendo controlar dos motores DC o un motor de paso con 1 o 2 polos \cite{naylampmechatronics}.
 
-El módulo permite controlar el sentido y velocidad de giro de motores mediante señales TTL que se pueden obtener de microcontroladores y tarjetas de desarrollo como Arduino, Raspberry Pi o Launchpads de Texas Instruments. El control del sentido de giro se realiza mediante dos pines para cada motor, la velocidad de giro se puede regular haciendo uso de modulación por ancho de pulso (PWM por sus siglas en inglés).
+El módulo permite controlar el sentido y velocidad de giro de motores mediante señales TTL que se pueden obtener de microcontroladores y tarjetas de desarrollo como Arduino, Raspberry Pi o Launchpads de Texas Instruments \cite{naylampmechatronics}. El control del sentido de giro se realiza mediante dos pines para cada motor, la velocidad de giro se puede regular haciendo uso de modulación por ancho de pulso (PWM por sus siglas en inglés).
 
-Tiene integrado un regulador de voltaje LM7805 de 5V encargado de alimentar la parte lógica del L298N, el uso de este regulador se hace a través de un Jumper y se puede usar para alimentar la etapa de control.
+Tiene integrado un regulador de voltaje LM7805 de 5V encargado de alimentar la parte lógica del L298N, el uso de este regulador se hace a través de un Jumper y se puede usar para alimentar la etapa de control \cite{naylampmechatronics}.
 
 \textbf{Especificaciones}
 \begin{itemize}
