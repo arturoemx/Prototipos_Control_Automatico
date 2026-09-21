@@ -1,10 +1,16 @@
 \begin{thebibliography}{}
 
-\bibitem[nay, ]{naylampmechatronics}
-{Driver Puente H L298N 2A}.
-
-\bibitem[Automaticaddison, 2021]{automaticaddison-2021}
-Automaticaddison (2021).
+\bibitem[{Automaticaddison}, 2021]{automaticaddison-2021}
+{Automaticaddison} (2021).
 \newblock {How to Calculate the Velocity of a DC Motor With Encoder}.
+
+\bibitem[{Naylamp Mechatronics}, 2023]{naylampmechatronics}
+{Naylamp Mechatronics} (2023).
+\newblock {Driver Puente H L298N 2A}.
+
+\bibitem[{Open Impulse}, sf]{OpenImpulse}
+{Open Impulse} (s.f.).
+\newblock {JGA25-371 DC Gearmotor with Encoder (126 RPM at 12 V) | Open
+  ImpulseOpen Impulse}.
 
 \end{thebibliography}
