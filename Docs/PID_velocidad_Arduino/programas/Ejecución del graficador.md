@@ -7,6 +7,7 @@ librerías y mantener un mejor control de los paquetes usados se realizará todo
 **Primero se actualizan los repositorios y se instala el paquete** python3-venv
 
 `sudo apt update`
+
 `sudo apt install python3-venv`
 **`apt`** es el gestor de paquetes que usan las distribuciones basadas en Debian, si se usa otra
 distribución basta con cambiar `apt` por el gestor que se use en realidad.
